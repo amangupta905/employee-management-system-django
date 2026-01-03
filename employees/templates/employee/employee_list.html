@@ -1,5 +1,38 @@
 {% extends 'employee/base.html' %}
+
 {% block content %}
+
+<p>Logged in as: <strong>{{ request.user.username }}</strong></p>
+
+<!-- 🔍 Search & Filter Form -->
+<form method="get" class="row mb-3">
+    <div class="col-md-4">
+        <input
+            type="text"
+            name="q"
+            class="form-control"
+            placeholder="Search by name or email"
+            value="{{ request.GET.q }}"
+        >
+    </div>
+
+    <div class="col-md-4">
+        <input
+            type="text"
+            name="department"
+            class="form-control"
+            placeholder="Filter by department"
+            value="{{ request.GET.department }}"
+        >
+    </div>
+
+    <div class="col-md-4">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="{% url 'employee_list' %}" class="btn btn-secondary">Reset</a>
+    </div>
+</form>
+
+<!-- ➕ Add Employee button -->
 <a href="{% url 'employee_create' %}" class="btn btn-success mb-3">Add Employee</a>
 
 <table class="table table-bordered">
@@ -10,7 +43,8 @@
         <th>Department</th>
         <th>Actions</th>
     </tr>
-    {% for emp in employees %}
+
+    {% for emp in page_obj %}
     <tr>
         <td>{{ emp.name }}</td>
         <td>{{ emp.email }}</td>
@@ -21,8 +55,47 @@
             <a href="{% url 'employee_delete' emp.id %}" class="btn btn-danger btn-sm">Delete</a>
         </td>
     </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5" class="text-center">No employees found.</td>
+    </tr>
     {% endfor %}
-</table> 
+</table>
 
+<!-- 📄 Pagination (Search-safe) -->
+<nav>
+<ul class="pagination">
+    {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}&department={{ request.GET.department }}">
+               Previous
+            </a>
+        </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% else %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="?page={{ num }}&q={{ request.GET.q }}&department={{ request.GET.department }}">
+                   {{ num }}
+                </a>
+            </li>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}&department={{ request.GET.department }}">
+               Next
+            </a>
+        </li>
+    {% endif %}
+</ul>
+</nav>
 
 {% endblock %}

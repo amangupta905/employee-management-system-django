@@ -1,26 +1,44 @@
-from rest_framework import generics
-from django.shortcuts import render, redirect,get_object_or_404
-from .models import employeeModel
-from .Serializer import EmployeeSerializer
-from .forms import EmployeeForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from .models import employeeModel
+from .forms import EmployeeForm
+from django.core.paginator import Paginator
 
-
-# DRF API
-class EmployeeListCreateAPI(generics.ListCreateAPIView):
-    queryset = employeeModel.objects.all()
-    serializer_class = EmployeeSerializer
-
-
-# READ
+@login_required
 def employee_list(request):
-    employees = employeeModel.objects.all()
-    return render(request, 'employee/employee_list.html', {'employees': employees})
+    employees = employeeModel.objects.all().order_by('id')
 
-# def employee_list(request):
-    # return HttpResponse("EMPLOYEE PAGE WORKING")
+    # 🔍 Search
+    search_query = request.GET.get('q')
+    if search_query:
+        employees = employees.filter(
+            name__icontains=search_query
+        ) | employees.filter(
+            email__icontains=search_query
+        )
 
-# CREATE
+    # Filter by department
+    department = request.GET.get('department')
+    if department:
+        employees = employees.filter(department__icontains=department)
+
+    #  Pagination
+    paginator = Paginator(employees, 3)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'employee/employee_list.html',
+        {
+            'page_obj': page_obj,
+            'search_query': search_query,
+            'department': department
+        }
+    )
+
+@login_required
 def employee_create(request):
     form = EmployeeForm(request.POST or None)
     if form.is_valid():
@@ -28,7 +46,7 @@ def employee_create(request):
         return redirect('employee_list')
     return render(request, 'employee/employee_form.html', {'form': form})
 
-# UPDATE
+@login_required
 def employee_update(request, id):
     employee = get_object_or_404(employeeModel, id=id)
     form = EmployeeForm(request.POST or None, instance=employee)
@@ -37,14 +55,10 @@ def employee_update(request, id):
         return redirect('employee_list')
     return render(request, 'employee/employee_form.html', {'form': form})
 
-# DELETE
+@login_required
 def employee_delete(request, id):
     employee = get_object_or_404(employeeModel, id=id)
     if request.method == 'POST':
         employee.delete()
         return redirect('employee_list')
     return render(request, 'employee/employee_confirm_delete.html', {'employee': employee})
-
-
-
-# Create your views here.

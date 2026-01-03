@@ -18,12 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 
-def home_redirect(request):
-    return redirect('employee_list')
-
+def home(request):
+    if request.user.is_authenticated:
+        return redirect('employee_list')
+    return redirect('login')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home_redirect),          
+    path('', home),
     path('employees/', include('employees.urls')),
+    path('accounts/', include('accounts.urls')),
 ]
