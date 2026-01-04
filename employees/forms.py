@@ -5,4 +5,5 @@ from .models import employeeModel
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = employeeModel
-        fields = '__all__'
+        exclude = ['is_deleted', 'deleted_at']
+
