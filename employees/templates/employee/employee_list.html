@@ -46,7 +46,12 @@
 
     {% for emp in page_obj %}
     <tr>
-        <td>{{ emp.name }}</td>
+        <td>
+           <a href="{% url 'employee_detail' emp.id %}">
+                {{ emp.name }}
+            </a>
+        </td>
+
         <td>{{ emp.email }}</td>
         <td>{{ emp.age }}</td>
         <td>{{ emp.department }}</td>

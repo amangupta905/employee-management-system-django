@@ -1,0 +1,19 @@
+{% extends 'employee/base.html' %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h4>Employee Details</h4>
+    </div>
+    <div class="card-body">
+        <p><strong>Name:</strong> {{ employee.name }}</p>
+        <p><strong>Email:</strong> {{ employee.email }}</p>
+        <p><strong>Age:</strong> {{ employee.age }}</p>
+        <p><strong>Department:</strong> {{ employee.department }}</p>
+
+        <a href="{% url 'employee_update' employee.id %}" class="btn btn-warning">Edit</a>
+        <a href="{% url 'employee_delete' employee.id %}" class="btn btn-danger">Delete</a>
+        <a href="{% url 'employee_list' %}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{% endblock %}
